@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:logger/logger.dart';
 
 import '../../../data/repositories/authentication/authentication_repository.dart';
 import '../../../utils/constants/image_strings.dart';
@@ -20,6 +21,11 @@ class LoginController extends GetxController {
   final password = TextEditingController();
   final userController = Get.put(UserController());
   GlobalKey<FormState> loginFormKey = GlobalKey<FormState>();
+  final isLoading = false.obs;
+  final _logger = Logger();
+  final _networkManager = NetworkManager.instance;
+  final _storage = GetStorage();
+  final _authRepository = AuthenticationRepository.instance;
 
   @override
   void onInit() {
@@ -29,51 +35,53 @@ class LoginController extends GetxController {
   }
 
   /// -- Email and Password SignIn
-  Future<void> emailAndPasswordSignIn() async {
+  Future<void> emailPasswordSignIn() async {
     try {
-      // Start Loading
-      BaakasFullScreenLoader.openLoadingDialog(
-        'Logging you in...',
-        BaakasImages.docerAnimation,
-      );
-
-      // Check Internet Connectivity
-      final isConnected = await NetworkManager.instance.isConnected();
-      if (!isConnected) {
-        BaakasFullScreenLoader.stopLoading();
-        BaakasLoaders.customToast(message: 'No Internet Connection');
-        return;
+      isLoading.value = true;
+      _logger.i('Starting email/password sign in process');
+      
+      // Check internet connectivity
+      if (!await _networkManager.isConnected()) {
+        _logger.w('No internet connection available');
+        throw 'Please check your internet connection';
       }
 
-      // Form Validation
+      // Validate form
       if (!loginFormKey.currentState!.validate()) {
-        BaakasFullScreenLoader.stopLoading();
+        _logger.w('Form validation failed');
+        isLoading.value = false;
         return;
       }
 
-      // Save Data if Remember Me is selected
+      // Save credentials if remember me is checked
       if (rememberMe.value) {
-        localStorage.write('REMEMBER_ME_EMAIL', email.text.trim());
-        localStorage.write('REMEMBER_ME_PASSWORD', password.text.trim());
+        _logger.i('Saving credentials for remember me');
+        await _storage.write('email', email.text.trim());
+        await _storage.write('password', password.text.trim());
       }
 
-      // Login user using EMail & Password Authentication
-      final userCredentials = await AuthenticationRepository.instance
-          .loginWithEmailAndPassword(email.text.trim(), password.text.trim());
-
-      // Assign user data to RxUser of UserController to use in app
-      await userController.fetchUserRecord();
-
-      // Remove Loader
-      BaakasFullScreenLoader.stopLoading();
-
-      // Redirect
-      await AuthenticationRepository.instance.screenRedirect(
-        userCredentials.user,
+      _logger.i('Attempting to sign in with email: ${email.text.trim()}');
+      final userCredential = await _authRepository.loginWithEmailAndPassword(
+        email.text.trim(),
+        password.text.trim(),
       );
+
+      _logger.i('Successfully signed in user: ${userCredential.user?.uid}');
+      
+      // Clear form
+      email.text = '';
+      password.text = '';
+      
+      // Navigate to home
+      await AuthenticationRepository.instance.screenRedirect(userCredential.user);
     } catch (e) {
-      BaakasFullScreenLoader.stopLoading();
-      BaakasLoaders.errorSnackBar(title: 'Oh Snap', message: e.toString());
+      _logger.e('Error during email/password sign in: $e');
+      BaakasLoaders.errorSnackBar(
+        title: 'Oh Snap!',
+        message: e.toString(),
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 

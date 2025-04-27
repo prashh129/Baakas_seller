@@ -26,7 +26,7 @@ class NotificationList extends StatelessWidget {
                 size: 64,
                 color: Theme.of(
                   context,
-                ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
               ),
               const SizedBox(height: 16),
               Text(
@@ -34,7 +34,7 @@ class NotificationList extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: Theme.of(
                     context,
-                  ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                  ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
                 ),
               ),
               const SizedBox(height: 8),
@@ -43,7 +43,7 @@ class NotificationList extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(
                     context,
-                  ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                  ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -173,7 +173,7 @@ class NotificationTile extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.2),
+            color: color.withValues(alpha: 51),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, color: color),
@@ -192,7 +192,7 @@ class NotificationTile extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(
                   context,
-                ).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                ).textTheme.bodyLarge?.color?.withValues(alpha: 179),
               ),
             ),
             const SizedBox(height: 4),
@@ -201,7 +201,7 @@ class NotificationTile extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(
                   context,
-                ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
               ),
             ),
           ],

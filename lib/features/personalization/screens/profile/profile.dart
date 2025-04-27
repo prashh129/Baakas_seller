@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import '../../../../common/widgets/appbar/appbar.dart';
-import '../../../../common/widgets/images/Baakas_circular_image.dart';
+import '../../../../common/widgets/images/baakas_circular_image.dart';
 import '../../../../common/widgets/shimmers/shimmer.dart';
 import '../../../../common/widgets/texts/section_heading.dart';
 import '../../../../utils/constants/image_strings.dart';
@@ -37,10 +37,9 @@ class ProfileScreen extends StatelessWidget {
                   children: [
                     Obx(() {
                       final networkImage = controller.user.value.profilePicture;
-                      final image =
-                          networkImage.isNotEmpty
-                              ? networkImage
-                              : BaakasImages.user;
+                      final image = networkImage?.isNotEmpty == true
+                          ? networkImage!
+                          : BaakasImages.user;
                       return controller.imageUploading.value
                           ? const BaakasShimmerEffect(
                             width: 80,
@@ -51,7 +50,7 @@ class ProfileScreen extends StatelessWidget {
                             image: image,
                             width: 80,
                             height: 80,
-                            isNetworkImage: networkImage.isNotEmpty,
+                            isNetworkImage: networkImage?.isNotEmpty == true,
                           );
                     }),
                     TextButton(
@@ -106,24 +105,6 @@ class ProfileScreen extends StatelessWidget {
                 title: 'Phone Number',
                 value: controller.user.value.phoneNumber,
               ),
-              BaakasProfileMenu(
-                onPressed: () {},
-                title: 'Gender',
-                value:
-                    controller.user.value.gender.isNotEmpty == true
-                        ? controller.user.value.gender
-                        : 'Not specified', // Fallback value for gender
-              ),
-
-              BaakasProfileMenu(
-                onPressed: () {},
-                title: 'Date of Birth',
-                value:
-                    controller.user.value.dateOfBirth?.isNotEmpty == true
-                        ? controller.user.value.dateOfBirth!
-                        : 'Not specified', // Fallback value for date of birth
-              ),
-
               const Divider(),
               const SizedBox(height: BaakasSizes.spaceBtwItems),
               Center(

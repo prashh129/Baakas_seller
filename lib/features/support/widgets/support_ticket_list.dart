@@ -25,20 +25,20 @@ class SupportTicketList extends StatelessWidget {
               Icon(
                 Iconsax.message,
                 size: 64,
-                color: theme.colorScheme.onSurface.withOpacity(0.4),
+                color: theme.colorScheme.onSurface.withValues(alpha: 102),
               ),
               const SizedBox(height: 16),
               Text(
                 'No Support Tickets',
                 style: theme.textTheme.titleLarge?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.4),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 102),
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Create a new ticket for support',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.4),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 102),
                 ),
               ),
             ],
@@ -66,7 +66,7 @@ class SupportTicketList extends StatelessWidget {
                   Text(
                     ticket.description,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 179),
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -82,7 +82,7 @@ class SupportTicketList extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: _getStatusColor(
                             ticket.status,
-                          ).withOpacity(0.2),
+                          ).withValues(alpha: 51),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -96,7 +96,7 @@ class SupportTicketList extends StatelessWidget {
                       Text(
                         '${ticket.messages.length} messages',
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.4),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 102),
                         ),
                       ),
                     ],
@@ -106,7 +106,7 @@ class SupportTicketList extends StatelessWidget {
               trailing: Text(
                 _formatDate(ticket.createdAt),
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.4),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 102),
                 ),
               ),
               onTap: () {

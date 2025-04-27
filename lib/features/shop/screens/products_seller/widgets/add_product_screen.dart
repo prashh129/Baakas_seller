@@ -12,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:baakas_seller/features/shop/controllers/category_controller.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:baakas_seller/utils/constants/colors.dart';
 
 class AddProductScreen extends StatefulWidget {
   final ProductModelSeller? productToEdit;
@@ -47,6 +48,18 @@ class _AddProductScreenState extends State<AddProductScreen> {
   @override
   void initState() {
     super.initState();
+    
+    // Initialize CategoryController if not already initialized
+    if (!Get.isRegistered<CategoryController>()) {
+      Get.put(CategoryController());
+    }
+    
+    // Load categories if empty
+    final categoryController = Get.find<CategoryController>();
+    if (categoryController.categories.isEmpty) {
+      categoryController.loadCategories();
+    }
+    
     if (widget.productToEdit != null) {
       _titleController.text = widget.productToEdit!.title;
       _descriptionController.text = widget.productToEdit!.description ?? '';
@@ -56,9 +69,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
       // Initialize variants if editing
       if (widget.productToEdit!.variants.isNotEmpty) {
         final variants = widget.productToEdit!.variants;
-        _selectedSizes = List<String>.from(variants['sizes'] ?? []);
-        _selectedColors = List<String>.from(variants['colors'] ?? []);
-        _variantStock = Map<String, Map<String, int>>.from(variants['stock'] ?? {});
+        _selectedSizes = variants['sizes'] is List ? List<String>.from(variants['sizes']) : [];
+        _selectedColors = variants['colors'] is List ? List<String>.from(variants['colors']) : [];
+        _variantStock = variants['stock'] is Map ? Map<String, Map<String, int>>.from(variants['stock']) : {};
       }
 
       // Initialize tags
@@ -190,42 +203,78 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate() || _images.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Fill all required fields and upload at least one image'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    final categoryController = Get.find<CategoryController>();
-    if (categoryController.selectedCategories.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select at least one category'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
     try {
+      if (!_formKey.currentState!.validate() || _images.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Fill all required fields and upload at least one image'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      final categoryController = Get.find<CategoryController>();
+      if (categoryController.selectedCategories.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select at least one category'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Validate price fields
+      double? price;
+      double? discountPrice;
+      try {
+        price = double.parse(_priceController.text);
+        if (_discountController.text.isNotEmpty) {
+          discountPrice = double.parse(_discountController.text);
+          if (discountPrice >= price) {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Discount price must be less than regular price'),
+                backgroundColor: Colors.red,
+              ),
+            );
+            return;
+          }
+        }
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter valid price values'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      setState(() => _isLoading = true);
+
       List<String> imageUrls = [];
 
+      // Handle image uploads
       for (var image in _images) {
-        final fileName = const Uuid().v4();
-        final ref = FirebaseStorage.instance.ref().child(
-          'product_images/$fileName',
-        );
-        await ref.putFile(image);
-        final url = await ref.getDownloadURL();
-        imageUrls.add(url);
+        if (image.path.startsWith('http')) {
+          // If it's an existing image URL, keep it
+          imageUrls.add(image.path);
+        } else {
+          // Upload new images
+          final fileName = const Uuid().v4();
+          final ref = FirebaseStorage.instance.ref().child(
+            'product_images/$fileName',
+          );
+          await ref.putFile(image);
+          final url = await ref.getDownloadURL();
+          imageUrls.add(url);
+        }
       }
 
       // Calculate total stock
@@ -236,73 +285,77 @@ class _AddProductScreenState extends State<AddProductScreen> {
         }
       }
 
+      final sellerId = FirebaseAuth.instance.currentUser?.uid;
+      if (sellerId == null) {
+        throw 'User not authenticated';
+      }
+
       final productData = {
-        'title': _titleController.text,
+        'title': _titleController.text.trim(),
         'description': _descriptionController.text.trim(),
-        'price': double.parse(_priceController.text),
-        'discountPrice': _discountController.text.isNotEmpty 
-            ? double.parse(_discountController.text) 
-            : null,
+        'price': price,
+        'discountPrice': discountPrice,
         'categories': categoryController.selectedCategories.map((c) => c.name).toList(),
         'categoryIds': categoryController.selectedCategories.map((c) => c.id).toList(),
         'tags': _tags.map((tag) => tag.trim()).toList(),
         'images': imageUrls,
-        'status': 'Active',
-        'createdAt': Timestamp.now(),
-        'sellerId': FirebaseAuth.instance.currentUser?.uid,
+        'status': widget.productToEdit?.status ?? 'pending',
+        'updatedAt': Timestamp.now(),
+        'sellerId': sellerId,
         'variants': {
           'sizes': _selectedSizes,
           'colors': _selectedColors,
           'stock': _variantStock,
         },
         'totalStock': totalStock,
-        'isFeatured': false,
-        'soldQuantity': 0,
+        'isFeatured': widget.productToEdit?.isFeatured ?? false,
+        'soldQuantity': widget.productToEdit?.soldQuantity ?? 0,
         'productType': 'variable',
         'thumbnail': imageUrls.isNotEmpty ? imageUrls[0] : '',
       };
 
-      // Save to seller's collection
-      final sellerDocRef = await FirebaseFirestore.instance
-          .collection('Sellers')
-          .doc(FirebaseAuth.instance.currentUser?.uid)
-          .collection('seller_products')
-          .add(productData);
+      if (widget.productToEdit != null) {
+        // Update existing product
+        await FirebaseFirestore.instance
+            .collection('Sellers')
+            .doc(sellerId)
+            .collection('seller_products')
+            .doc(widget.productToEdit!.id)
+            .update(productData);
 
-      final newProduct = ProductModelSeller(
-        id: sellerDocRef.id,
-        title: _titleController.text,
-        images: imageUrls,
-        status: 'Active',
-        stock: totalStock,
-        variants: productData['variants'] as Map<String, dynamic>,
-        description: _descriptionController.text.trim(),
-        price: double.parse(_priceController.text),
-        discountPrice: _discountController.text.isNotEmpty 
-            ? double.parse(_discountController.text) 
-            : null,
-        categories: categoryController.selectedCategories.map((c) => c.name).toList(),
-        categoryIds: categoryController.selectedCategories.map((c) => c.id).toList(),
-        tags: _tags.map((tag) => tag.trim()).toList(),
-        thumbnail: imageUrls.isNotEmpty ? imageUrls[0] : '',
-        productType: 'variable',
-        soldQuantity: 0,
-        createdAt: DateTime.now(),
-        sellerId: FirebaseAuth.instance.currentUser?.uid,
-      );
+        if (!mounted) return;
+        Navigator.pop(context, true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Product updated successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        // Create new product
+        productData['createdAt'] = Timestamp.now();
+        await FirebaseFirestore.instance
+            .collection('Sellers')
+            .doc(sellerId)
+            .collection('seller_products')
+            .add(productData);
 
-      if (!mounted) return;
-      Navigator.pop(context, newProduct);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Product added successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
+        if (!mounted) return;
+        Navigator.pop(context, true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Product added successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     } finally {
       if (mounted) {
@@ -328,394 +381,643 @@ class _AddProductScreenState extends State<AddProductScreen> {
     required IconData icon,
     int maxLines = 1,
     String? Function(String?)? validator,
+    TextInputType? keyboardType,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    final borderColor = Theme.of(context).dividerColor;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
         maxLines: maxLines,
         validator: validator,
+        keyboardType: keyboardType,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 16,
+        ),
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon: Icon(icon),
+          labelStyle: TextStyle(
+            color: textColor?.withOpacity(0.7),
+            fontSize: 16,
+          ),
+          prefixIcon: Icon(
+            icon,
+            color: BaakasColors.primaryColor,
+          ),
+          filled: true,
+          fillColor: isDark ? Colors.black12 : Colors.grey.shade50,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: borderColor,
+              width: 1.5,
+            ),
           ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: borderColor,
+              width: 1.5,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              color: BaakasColors.primaryColor,
+              width: 2,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: Colors.red,
+              width: 1.5,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: Colors.red,
+              width: 2,
+            ),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
     );
   }
 
   Widget _buildCategorySelection() {
-    final categoryController = Get.put(CategoryController());
-    
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Obx(() {
-        if (categoryController.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        
-        if (categoryController.categories.isEmpty) {
-          return const Center(child: Text('No categories available'));
-        }
-        
-        return InputDecorator(
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Iconsax.category),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-          ),
-          child: ExpansionTile(
-            title: Row(
-              children: [
-                const Text(
-                  'Select Categories',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                if (categoryController.selectedCategories.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${categoryController.selectedCategories.length} selected',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            leading: const SizedBox.shrink(),
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 4),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: categoryController.categories.length,
-                  itemBuilder: (context, index) {
-                    final category = categoryController.categories[index];
-                    return Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          categoryController.toggleCategory(category);
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          child: Row(
-                            children: [
-                              Checkbox(
-                                value: categoryController.isCategorySelected(category),
-                                onChanged: (bool? value) {
-                                  if (value != null) {
-                                    categoryController.toggleCategory(category);
-                                  }
-                                },
-                                activeColor: Theme.of(context).primaryColor,
-                                checkColor: Colors.white,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  category.name,
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              if (categoryController.selectedCategories.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Wrap(
-                    spacing: 8,
-                    children: categoryController.selectedCategories.map((category) {
-                      return Chip(
-                        label: Text(category.name),
-                        onDeleted: () {
-                          categoryController.toggleCategory(category);
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ),
-            ],
-          ),
-        );
-      }),
-    );
-  }
+    final categoryController = Get.find<CategoryController>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-  Widget _buildTagsSection() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InputDecorator(
-            decoration: InputDecoration(
-              labelText: 'Tags',
-              prefixIcon: const Icon(Iconsax.tag),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _tagController,
-                        decoration: const InputDecoration(
-                          hintText: 'Add a tag and press comma',
-                          border: InputBorder.none,
-                        ),
-                        onSubmitted: (value) {
-                          if (value.endsWith(',')) {
-                            _addTag(value.substring(0, value.length - 1));
-                          }
-                        },
-                        onChanged: (value) {
-                          if (value.endsWith(',')) {
-                            _addTag(value.substring(0, value.length - 1));
-                          }
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Obx(() => Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _tags.map((tag) {
-                    return Chip(
-                      label: Text(tag),
-                      onDeleted: () => _removeTag(tag),
-                      deleteIcon: const Icon(Icons.close, size: 18),
-                    );
-                  }).toList(),
-                )),
-              ],
+          Text(
+            'Categories',
+            style: TextStyle(
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
             ),
           ),
+          const SizedBox(height: 8),
+          Obx(() {
+            if (categoryController.isLoading.value) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+
+            if (categoryController.categories.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'No categories available',
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return InputDecorator(
+              decoration: InputDecoration(
+                prefixIcon: Icon(
+                  Iconsax.category,
+                  color: BaakasColors.primaryColor,
+                ),
+                filled: true,
+                fillColor: Theme.of(context).cardColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).dividerColor,
+                    width: 1.5,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).dividerColor,
+                    width: 1.5,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: BaakasColors.primaryColor,
+                    width: 2,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              ),
+              child: ExpansionTile(
+                title: Row(
+                  children: [
+                    Text(
+                      'Select Categories',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                    ),
+                    Obx(() {
+                      if (categoryController.selectedCategories.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: BaakasColors.primaryColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${categoryController.selectedCategories.length} selected',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+                leading: const SizedBox.shrink(),
+                childrenPadding: EdgeInsets.zero,
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: categoryController.categories.length,
+                    itemBuilder: (context, index) {
+                      final category = categoryController.categories[index];
+                      final isSelected = categoryController.isCategorySelected(category);
+                      print('DEBUG UI: Building checkbox for ${category.name}, isSelected: $isSelected');
+                      return Obx(() {
+                        final isSelectedNow = categoryController.isCategorySelected(category);
+                        print('DEBUG UI: Rebuilding checkbox for ${category.name}, isSelectedNow: $isSelectedNow');
+                        return CheckboxListTile(
+                          title: Text(
+                            category.name,
+                            style: TextStyle(
+                              color: Theme.of(context).textTheme.bodyLarge?.color,
+                            ),
+                          ),
+                          value: isSelectedNow,
+                          onChanged: (selected) {
+                            if (selected != null) {
+                              print('DEBUG UI: Toggling ${category.name} to $selected');
+                              categoryController.toggleCategory(category);
+                            }
+                          },
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                          dense: true,
+                          activeColor: BaakasColors.primaryColor,
+                          checkColor: Colors.white,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          side: BorderSide(
+                            color: isSelectedNow ? BaakasColors.primaryColor : Theme.of(context).dividerColor,
+                            width: 1.5,
+                          ),
+                        );
+                      });
+                    },
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTagsSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    final borderColor = Theme.of(context).dividerColor;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Tags',
+            style: TextStyle(
+              color: textColor,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _tagController,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 16,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Add Tag',
+                    labelStyle: TextStyle(
+                      color: textColor?.withOpacity(0.7),
+                      fontSize: 16,
+                    ),
+                    prefixIcon: Icon(
+                      Iconsax.tag,
+                      color: BaakasColors.primaryColor,
+                    ),
+                    filled: true,
+                    fillColor: isDark ? Colors.black12 : Colors.grey.shade50,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: borderColor,
+                        width: 1.5,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: borderColor,
+                        width: 1.5,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: BaakasColors.primaryColor,
+                        width: 2,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  ),
+                  onFieldSubmitted: (value) {
+                    if (value.isNotEmpty) {
+                      _addTag(value);
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: () {
+                  if (_tagController.text.isNotEmpty) {
+                    _addTag(_tagController.text);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: BaakasColors.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                ),
+                child: const Text('Add', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Obx(() {
+            if (_tags.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            return Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: _tags.map((tag) {
+                return Chip(
+                  label: Text(
+                    tag,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  backgroundColor: BaakasColors.primaryColor,
+                  deleteIcon: const Icon(Iconsax.close_circle, color: Colors.white, size: 18),
+                  onDeleted: () => _removeTag(tag),
+                );
+              }).toList(),
+            );
+          }),
         ],
       ),
     );
   }
 
   Widget _buildVariantSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    final borderColor = Theme.of(context).dividerColor;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Product Variants',
           style: TextStyle(
-            color: Colors.white,
+            color: textColor,
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(height: 16),
-        // Size Selection
-        Wrap(
-          spacing: 8,
-          children: [
-            ..._availableSizes.map((size) {
-              final isSelected = _selectedSizes.contains(size);
-              return FilterChip(
-                label: Text(size),
-                selected: isSelected,
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _selectedSizes.add(size);
-                    } else {
-                      _selectedSizes.remove(size);
-                      // Remove stock entries for this size
-                      _variantStock.remove(size);
-                    }
-                  });
-                },
-              );
-            }),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // Color Selection - Combined predefined and custom colors
-        Wrap(
-          spacing: 8,
-          children: [
-            ..._availableColors.map((color) {
-              final isSelected = _selectedColors.contains(color);
-              return FilterChip(
-                label: Text(color),
-                selected: isSelected,
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _selectedColors.add(color);
-                    } else {
-                      _selectedColors.remove(color);
-                      // Remove stock entries for this color
-                      for (var size in _variantStock.keys) {
-                        _variantStock[size]?.remove(color);
-                      }
-                    }
-                  });
-                },
-              );
-            }),
-            // Show custom colors
-            ..._selectedColors
-                .where((color) => !_availableColors.contains(color))
-                .map((color) {
-              return FilterChip(
-                label: Text(color),
-                selected: true,
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedColors.remove(color);
-                    // Remove stock entries for this color
-                    for (var size in _variantStock.keys) {
-                      _variantStock[size]?.remove(color);
-                    }
-                  });
-                },
-              );
-            }),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // Custom Color Input
-        Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: _customColorController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Add Custom Color',
-                  labelStyle: const TextStyle(color: Colors.white70),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: const BorderSide(color: Colors.white30),
-                  ),
-                ),
-              ),
+        const SizedBox(height: 8),
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: borderColor,
+              width: 1.5,
             ),
-            const SizedBox(width: 8),
-            ElevatedButton(
-              onPressed: _addCustomColor,
-              child: const Text('Add'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // Stock Management
-        if (_selectedSizes.isNotEmpty && _selectedColors.isNotEmpty)
-          ..._selectedSizes.map((size) {
-            return Column(
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Stock for $size',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  'Sizes',
+                  style: TextStyle(
+                    color: textColor,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 const SizedBox(height: 8),
-                ..._selectedColors.map((color) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            color,
-                            style: const TextStyle(color: Colors.white70),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 100,
-                          child: TextFormField(
-                            initialValue: _variantStock[size]?[color]?.toString() ?? '0',
-                            keyboardType: TextInputType.number,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              labelText: 'Quantity',
-                              labelStyle: const TextStyle(color: Colors.white70),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(15),
-                                borderSide: const BorderSide(color: Colors.white30),
-                              ),
-                            ),
-                            onChanged: (value) {
-                              _updateVariantStock(
-                                size,
-                                color,
-                                int.tryParse(value) ?? 0,
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }),
+                Wrap(
+                  spacing: 8,
+                  children: _availableSizes.map((size) {
+                    final isSelected = _selectedSizes.contains(size);
+                    return FilterChip(
+                      label: Text(size),
+                      selected: isSelected,
+                      selectedColor: BaakasColors.primaryColor.withOpacity(0.2),
+                      checkmarkColor: BaakasColors.primaryColor,
+                      labelStyle: TextStyle(
+                        color: isSelected ? BaakasColors.primaryColor : textColor,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                      onSelected: (selected) {
+                        setState(() {
+                          if (selected) {
+                            _selectedSizes.add(size);
+                          } else {
+                            _selectedSizes.remove(size);
+                            _variantStock.remove(size);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
                 const SizedBox(height: 16),
+                Text(
+                  'Colors',
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    ..._availableColors.map((color) {
+                      final isSelected = _selectedColors.contains(color);
+                      return FilterChip(
+                        label: Text(color),
+                        selected: isSelected,
+                        selectedColor: BaakasColors.primaryColor.withOpacity(0.2),
+                        checkmarkColor: BaakasColors.primaryColor,
+                        labelStyle: TextStyle(
+                          color: isSelected ? BaakasColors.primaryColor : textColor,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              _selectedColors.add(color);
+                            } else {
+                              _selectedColors.remove(color);
+                              for (var size in _variantStock.keys) {
+                                _variantStock[size]?.remove(color);
+                              }
+                            }
+                          });
+                        },
+                      );
+                    }),
+                    ..._selectedColors
+                        .where((color) => !_availableColors.contains(color))
+                        .map((color) {
+                      return FilterChip(
+                        label: Text(color),
+                        selected: true,
+                        selectedColor: BaakasColors.primaryColor.withOpacity(0.2),
+                        checkmarkColor: BaakasColors.primaryColor,
+                        labelStyle: TextStyle(
+                          color: BaakasColors.primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedColors.remove(color);
+                            for (var size in _variantStock.keys) {
+                              _variantStock[size]?.remove(color);
+                            }
+                          });
+                        },
+                      );
+                    }),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _customColorController,
+                        style: TextStyle(
+                          color: textColor,
+                          fontSize: 16,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: 'Add Custom Color',
+                          labelStyle: TextStyle(
+                            color: textColor?.withOpacity(0.7),
+                            fontSize: 16,
+                          ),
+                          prefixIcon: Icon(
+                            Iconsax.colorfilter,
+                            color: BaakasColors.primaryColor,
+                          ),
+                          filled: true,
+                          fillColor: isDark ? Colors.black12 : Colors.grey.shade50,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: borderColor,
+                              width: 1.5,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: borderColor,
+                              width: 1.5,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: BaakasColors.primaryColor,
+                              width: 2,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: _addCustomColor,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: BaakasColors.primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      ),
+                      child: const Text('Add', style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                ),
+                if (_selectedSizes.isNotEmpty && _selectedColors.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  ..._selectedSizes.map((size) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Stock for $size',
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ..._selectedColors.map((color) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    color,
+                                    style: TextStyle(color: textColor?.withOpacity(0.7)),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 100,
+                                  child: TextFormField(
+                                    initialValue: _variantStock[size]?[color]?.toString() ?? '0',
+                                    keyboardType: TextInputType.number,
+                                    style: TextStyle(color: textColor),
+                                    decoration: InputDecoration(
+                                      labelText: 'Quantity',
+                                      labelStyle: TextStyle(color: textColor?.withOpacity(0.7)),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: borderColor),
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: borderColor),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(color: BaakasColors.primaryColor),
+                                      ),
+                                    ),
+                                    onChanged: (value) {
+                                      _updateVariantStock(
+                                        size,
+                                        color,
+                                        int.tryParse(value) ?? 0,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                        const SizedBox(height: 16),
+                      ],
+                    );
+                  }),
+                ],
               ],
-            );
-          }),
+            ),
+          ),
+        ),
       ],
     );
   }
 
   Widget _buildImagePreview() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white70 : Colors.black87;
+    final borderColor = isDark ? Colors.white30 : Colors.black26;
+    final iconColor = isDark ? Colors.white70 : Colors.black54;
+    
     return Container(
       height: 150,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white30),
+        border: Border.all(color: borderColor),
         borderRadius: BorderRadius.circular(15),
+        color: isDark ? Colors.black12 : Colors.grey.shade100,
       ),
       child: Column(
         children: [
           Expanded(
             child: _images.isEmpty
-                ? const Center(
+                ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.image, color: Colors.white70, size: 32),
-                        SizedBox(height: 8),
+                        Icon(Icons.image, color: iconColor, size: 32),
+                        const SizedBox(height: 8),
                         Text(
                           'No images selected',
-                          style: TextStyle(color: Colors.white70),
+                          style: TextStyle(color: textColor),
                         ),
                       ],
                     ),
@@ -732,17 +1034,18 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             child: Container(
                               width: 120,
                               decoration: BoxDecoration(
-                                border: Border.all(color: Colors.white30),
+                                border: Border.all(color: borderColor),
                                 borderRadius: BorderRadius.circular(10),
+                                color: isDark ? Colors.black26 : Colors.grey.shade200,
                               ),
-                              child: const Column(
+                              child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(Icons.add_photo_alternate, color: Colors.white70, size: 32),
-                                  SizedBox(height: 8),
+                                  Icon(Icons.add_photo_alternate, color: iconColor, size: 32),
+                                  const SizedBox(height: 8),
                                   Text(
                                     'Add More',
-                                    style: TextStyle(color: Colors.white70),
+                                    style: TextStyle(color: textColor),
                                   ),
                                 ],
                               ),
@@ -798,18 +1101,20 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 children: [
                   ElevatedButton.icon(
                     onPressed: _pickMultipleImages,
-                    icon: const Icon(Icons.add_photo_alternate),
-                    label: const Text('Select Images'),
+                    icon: const Icon(Icons.add_photo_alternate, color: Colors.white),
+                    label: const Text('Select Images', style: TextStyle(color: Colors.white)),
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: BaakasColors.primaryColor,
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                   ),
                   const SizedBox(width: 16),
                   ElevatedButton.icon(
                     onPressed: _pickImageFromCamera,
-                    icon: const Icon(Icons.camera_alt),
-                    label: const Text('Take Photo'),
+                    icon: const Icon(Icons.camera_alt, color: Colors.white),
+                    label: const Text('Take Photo', style: TextStyle(color: Colors.white)),
                     style: ElevatedButton.styleFrom(
+                      backgroundColor: BaakasColors.primaryColor,
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     ),
                   ),
@@ -823,11 +1128,27 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    final borderColor = Theme.of(context).dividerColor;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: const BaakasAppBar(
-        showBackArrow: true,
-        title: Text('Add Product'),
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Iconsax.arrow_left, color: BaakasColors.primaryColor),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          widget.productToEdit != null ? 'Edit Product' : 'Add Product',
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -851,24 +1172,26 @@ class _AddProductScreenState extends State<AddProductScreen> {
               ),
               _buildFormField(
                 controller: _priceController,
-                label: 'Price',
-                icon: Iconsax.dollar_circle,
+                label: 'Price (Rs)',
+                icon: Icons.currency_rupee,
+                keyboardType: TextInputType.number,
                 validator: (val) => val!.isEmpty ? 'Enter product price' : null,
               ),
               _buildFormField(
                 controller: _discountController,
-                label: 'Discount Price (Optional)',
-                icon: Iconsax.discount_shape,
+                label: 'Discount Price (Rs) (Optional)',
+                icon: Icons.currency_rupee,
+                keyboardType: TextInputType.number,
               ),
               _buildCategorySelection(),
               _buildTagsSection(),
               const SizedBox(height: 16),
               _buildVariantSection(),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Product Images',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: textColor,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
@@ -880,9 +1203,24 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _submitForm,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: BaakasColors.primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                   child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Add Product'),
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : Text(
+                          widget.productToEdit != null ? 'Save Product' : 'Add Product',
+                          style: const TextStyle(color: Colors.white),
+                        ),
                 ),
               ),
             ],

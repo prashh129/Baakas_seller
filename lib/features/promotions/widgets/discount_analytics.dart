@@ -208,7 +208,7 @@ class DiscountAnalytics extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.2),
+                color: color.withValues(alpha: 51),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: color),
@@ -223,7 +223,7 @@ class DiscountAnalytics extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Theme.of(
                         context,
-                      ).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                      ).textTheme.bodyLarge?.color?.withValues(alpha: 179),
                     ),
                   ),
                   Text(
@@ -265,7 +265,7 @@ class DiscountAnalytics extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor.withOpacity(0.2),
+                color: Theme.of(context).primaryColor.withValues(alpha: 51),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -290,7 +290,7 @@ class DiscountAnalytics extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(
                         context,
-                      ).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                      ).textTheme.bodyLarge?.color?.withValues(alpha: 179),
                     ),
                   ),
                 ],
@@ -301,7 +301,7 @@ class DiscountAnalytics extends StatelessWidget {
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(
                   context,
-                ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
               ),
             ),
           ],

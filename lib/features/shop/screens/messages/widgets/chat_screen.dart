@@ -29,7 +29,7 @@ class ChatScreen extends StatelessWidget {
                 color:
                     isAdminChat
                         ? BaakasColors.primaryColor
-                        : BaakasColors.grey.withOpacity(0.2),
+                        : BaakasColors.grey.withValues(alpha: 51),
                 shape: BoxShape.circle,
               ),
               child: Icon(

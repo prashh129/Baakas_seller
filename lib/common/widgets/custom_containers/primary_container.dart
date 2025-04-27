@@ -41,7 +41,7 @@ class BaakasPrimaryContainer extends StatelessWidget {
           borderRadius: BorderRadius.circular(
             borderRadius ?? BaakasSizes.cardRadiusLg,
           ),
-          border: Border.all(color: BaakasColors.grey.withOpacity(0.1)),
+          border: Border.all(color: BaakasColors.grey.withValues(alpha: 26)),
         ),
         child: child,
       ),

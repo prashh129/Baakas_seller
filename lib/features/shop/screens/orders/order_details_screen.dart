@@ -13,7 +13,7 @@ class OrderDetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<OrderController>();
+    Get.find<OrderController>();
     final dark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(

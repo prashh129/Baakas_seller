@@ -10,6 +10,7 @@ import '../../../utils/constants/sizes.dart';
 import '../../../utils/helpers/network_manager.dart';
 import '../../../utils/popups/full_screen_loader.dart';
 import '../../../utils/popups/loaders.dart';
+import '../../../utils/constants/enums.dart';
 import '../../authentication/screens/login/login.dart';
 import '../models/user_model.dart';
 import '../screens/profile/re_authenticate_user_login_form.dart';
@@ -39,9 +40,13 @@ class UserController extends GetxController {
   Future<void> fetchUserRecord() async {
     try {
       profileLoading.value = true;
+      debugPrint('Fetching user record for ID: ${AuthenticationRepository.instance.getUserID}');
       final user = await userRepository.fetchUserDetails();
+      debugPrint('User record fetched successfully: ${user.id}');
+      debugPrint('User details: ${user.firstName} ${user.lastName}, ${user.email}');
       this.user(user);
     } catch (e) {
+      debugPrint('Error fetching user record: $e');
       user(UserModel.empty());
     } finally {
       profileLoading.value = false;
@@ -78,10 +83,15 @@ class UserController extends GetxController {
             email: userCredentials.user!.email ?? '',
             phoneNumber: userCredentials.user!.phoneNumber ?? '',
             profilePicture: userCredentials.user!.photoURL ?? '',
+            address: '',
+            role: AppRole.seller,
+            isEmailVerified: userCredentials.user!.emailVerified,
             createdAt: DateTime.now(),
-            gender:
-                '', // Add logic to handle gender if available from the provider
-            dateOfBirth: '', // Add logic to handle date of birth if available
+            updatedAt: DateTime.now(),
+            bio: null,
+            website: null,
+            socialLinks: {},
+            preferences: {},
           );
 
           // Save user data
@@ -124,7 +134,27 @@ class UserController extends GetxController {
         profileImageUrl.value = uploadedImage;
         Map<String, dynamic> newImage = {'ProfilePicture': uploadedImage};
         await userRepository.updateSingleField(newImage);
-        user.value.profilePicture = uploadedImage;
+        
+        // Create a new UserModel instance with updated profile picture
+        final updatedUser = UserModel(
+          id: user.value.id,
+          email: user.value.email,
+          firstName: user.value.firstName,
+          lastName: user.value.lastName,
+          username: user.value.username,
+          phoneNumber: user.value.phoneNumber,
+          profilePicture: uploadedImage,
+          address: user.value.address,
+          role: user.value.role,
+          isEmailVerified: user.value.isEmailVerified,
+          createdAt: user.value.createdAt,
+          updatedAt: DateTime.now(),
+          bio: user.value.bio,
+          website: user.value.website,
+          socialLinks: user.value.socialLinks,
+          preferences: user.value.preferences,
+        );
+        user.value = updatedUser;
         user.refresh();
 
         imageUploading.value = false;

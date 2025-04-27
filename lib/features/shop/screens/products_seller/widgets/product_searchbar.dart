@@ -20,7 +20,7 @@ class ProductSearchBar extends StatelessWidget {
         decoration: InputDecoration(
           labelText: 'Search Products',
           labelStyle: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 179),
           ),
           filled: true,
           fillColor: theme.colorScheme.surface,
@@ -38,7 +38,7 @@ class ProductSearchBar extends StatelessWidget {
           ),
           prefixIcon: Icon(
             Icons.search,
-            color: theme.colorScheme.onSurface.withOpacity(0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 179),
           ),
         ),
       ),

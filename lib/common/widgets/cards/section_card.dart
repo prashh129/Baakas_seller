@@ -30,7 +30,7 @@ class BaakasSectionCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(BaakasSizes.defaultSpace),
         decoration: BoxDecoration(
-          color: BaakasColors.primaryColor.withOpacity(0.1),
+          color: BaakasColors.primaryColor.withValues(alpha: 26),
           borderRadius: BorderRadius.circular(BaakasSizes.cardRadiusLg),
         ),
         child: Row(

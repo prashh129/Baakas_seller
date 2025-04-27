@@ -48,7 +48,7 @@ class ChatScreen extends StatelessWidget {
                             .textTheme
                             .bodyLarge
                             ?.color
-                            ?.withOpacity(0.5),
+                            ?.withValues(alpha: 128),
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -58,7 +58,7 @@ class ChatScreen extends StatelessWidget {
                               .textTheme
                               .bodyLarge
                               ?.color
-                              ?.withOpacity(0.5),
+                              ?.withValues(alpha: 128),
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -69,7 +69,7 @@ class ChatScreen extends StatelessWidget {
                               .textTheme
                               .bodyLarge
                               ?.color
-                              ?.withOpacity(0.5),
+                              ?.withValues(alpha: 128),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -120,7 +120,7 @@ class ChatScreen extends StatelessWidget {
               color: Theme.of(context).cardColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 26),
                   blurRadius: 4,
                   offset: const Offset(0, -2),
                 ),

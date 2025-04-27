@@ -28,7 +28,7 @@ class BaakasTextTheme {
     bodySmall: const TextStyle().copyWith(
         fontSize: 14.0,
         fontWeight: FontWeight.w500,
-        color: BaakasColors.dark.withOpacity(0.5)),
+        color: BaakasColors.dark.withValues(alpha: 128)),
     labelLarge: const TextStyle().copyWith(
         fontSize: 12.0,
         fontWeight: FontWeight.normal,
@@ -36,7 +36,7 @@ class BaakasTextTheme {
     labelMedium: const TextStyle().copyWith(
         fontSize: 12.0,
         fontWeight: FontWeight.normal,
-        color: BaakasColors.dark.withOpacity(0.5)),
+        color: BaakasColors.dark.withValues(alpha: 128)),
   );
 
   /// Customizable Dark Text Theme
@@ -62,7 +62,7 @@ class BaakasTextTheme {
     bodySmall: const TextStyle().copyWith(
         fontSize: 14.0,
         fontWeight: FontWeight.w500,
-        color: BaakasColors.light.withOpacity(0.5)),
+        color: BaakasColors.light.withValues(alpha: 128)),
     labelLarge: const TextStyle().copyWith(
         fontSize: 12.0,
         fontWeight: FontWeight.normal,
@@ -70,6 +70,6 @@ class BaakasTextTheme {
     labelMedium: const TextStyle().copyWith(
         fontSize: 12.0,
         fontWeight: FontWeight.normal,
-        color: BaakasColors.light.withOpacity(0.5)),
+        color: BaakasColors.light.withValues(alpha: 128)),
   );
 }

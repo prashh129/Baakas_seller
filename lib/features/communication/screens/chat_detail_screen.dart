@@ -240,7 +240,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundColor: BaakasColors.primaryColor.withOpacity(0.1),
+              backgroundColor: BaakasColors.primaryColor.withValues(alpha: 26),
               child: const Icon(Iconsax.user, color: BaakasColors.primaryColor),
             ),
             const SizedBox(width: 12),
@@ -322,7 +322,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         children: [
           if (_isBlocked)
             Container(
-              color: Colors.red[400]?.withOpacity(0.1),
+              color: Colors.red[400]?.withValues(alpha: 26),
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
               child: Row(
                 children: [
@@ -514,8 +514,8 @@ class _MessageBubble extends StatelessWidget {
                   style: theme.textTheme.bodySmall?.copyWith(
                     color:
                         isMe
-                            ? theme.colorScheme.onPrimary.withOpacity(0.7)
-                            : theme.colorScheme.onSurface.withOpacity(0.7),
+                            ? theme.colorScheme.onPrimary.withValues(alpha: 179)
+                            : theme.colorScheme.onSurface.withValues(alpha: 179),
                   ),
                 ),
               ],

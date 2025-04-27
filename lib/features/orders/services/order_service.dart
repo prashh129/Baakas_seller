@@ -62,7 +62,7 @@ class OrderService {
 
       return snapshot.docs.map((doc) => Order.fromSnapshot(doc)).toList();
     } catch (e) {
-      _logger.e('Error filtering orders: $e');
+      _logger.e('Error filtering orders by status: $e');
       return [];
     }
   }
@@ -70,8 +70,8 @@ class OrderService {
   Future<bool> processRefund(String orderId) async {
     try {
       await _firestore.collection(_collection).doc(orderId).update({
-        'status': 'refunded',
-        'refundedAt': firestore.FieldValue.serverTimestamp(),
+        'refundStatus': 'processed',
+        'refundDate': firestore.FieldValue.serverTimestamp(),
       });
       return true;
     } catch (e) {
@@ -83,8 +83,8 @@ class OrderService {
   Future<bool> processReturn(String orderId) async {
     try {
       await _firestore.collection(_collection).doc(orderId).update({
-        'status': 'returned',
-        'returnedAt': firestore.FieldValue.serverTimestamp(),
+        'returnStatus': 'processed',
+        'returnDate': firestore.FieldValue.serverTimestamp(),
       });
       return true;
     } catch (e) {

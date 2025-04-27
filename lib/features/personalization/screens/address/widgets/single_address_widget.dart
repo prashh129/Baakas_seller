@@ -1,4 +1,4 @@
-import 'package:baakas_seller/common/widgets/icons/Baakas_circular_icon.dart';
+import 'package:baakas_seller/common/widgets/icons/baakas_circular_icon.dart';
 import 'package:baakas_seller/features/personalization/screens/address/update_address.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -42,7 +42,7 @@ class BaakasSingleAddress extends StatelessWidget {
           width: double.infinity,
           backgroundColor:
               isAddressSelected
-                  ? BaakasColors.primaryColor.withOpacity(0.1)
+                  ? BaakasColors.primaryColor.withValues(alpha: 26)
                   : Colors.transparent,
           borderColor:
               isAddressSelected
@@ -57,7 +57,7 @@ class BaakasSingleAddress extends StatelessWidget {
                 right: 0,
                 top: 0,
                 child: BaakasCircularIcon(
-                  backgroundColor: BaakasColors.primaryColor.withOpacity(0.6),
+                  backgroundColor: BaakasColors.primaryColor.withValues(alpha: 153),
                   width: 42,
                   height: 42,
                   size: BaakasSizes.md,

@@ -26,7 +26,7 @@ class ReviewsScreen extends StatelessWidget {
                     labelColor: Theme.of(context).textTheme.bodyLarge?.color,
                     unselectedLabelColor: Theme.of(
                       context,
-                    ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                    ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
                     indicatorColor: Theme.of(context).primaryColor,
                     tabs: const [
                       Tab(text: 'All Reviews'),

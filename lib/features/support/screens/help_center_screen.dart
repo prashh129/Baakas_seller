@@ -58,7 +58,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen>
                   controller: _tabController,
                   labelColor: theme.colorScheme.onSurface,
                   unselectedLabelColor: theme.colorScheme.onSurface
-                      .withOpacity(0.5),
+                      .withValues(alpha: 128),
                   indicatorColor: BaakasColors.primaryColor,
                   tabs: const [
                     Tab(icon: Icon(Iconsax.message_question), text: 'FAQs'),

@@ -1,55 +1,68 @@
 import 'package:get/get.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/category_model.dart';
+import '../../../data/repositories/categories/category_repository.dart';
+import 'package:logger/logger.dart';
 
 class CategoryController extends GetxController {
   static CategoryController get instance => Get.find();
 
-  final _db = FirebaseFirestore.instance;
   final RxList<CategoryModel> categories = <CategoryModel>[].obs;
   final RxList<CategoryModel> selectedCategories = <CategoryModel>[].obs;
-  final RxBool isLoading = false.obs;
+  final RxBool isLoading = true.obs;
+  final _logger = Logger();
 
   @override
   void onInit() {
     super.onInit();
-    fetchCategories();
+    _logger.i('CategoryController initialized');
+    // Initialize the CategoryRepository
+    Get.put(CategoryRepository());
+    loadCategories();
   }
 
-  Future<void> fetchCategories() async {
+  Future<void> loadCategories() async {
     try {
+      _logger.i('Starting to load categories...');
       isLoading.value = true;
-      print('Starting to fetch categories...');
-      
-      final snapshot = await _db.collection('Categories')
-          .orderBy('Name')
-          .get();
-      
-      print('Number of documents: ${snapshot.docs.length}');
-      
-      categories.value = snapshot.docs
-          .map((doc) => CategoryModel.fromFirestore(doc))
-          .toList();
-      
-      print('Processed categories: ${categories.length}');
-      print('Category names: ${categories.map((c) => c.name).toList()}');
+      final categoryRepository = CategoryRepository.instance;
+      final loadedCategories = await categoryRepository.getAllCategories();
+      _logger.i('Loaded ${loadedCategories.length} categories');
+      _logger.i('First category name: ${loadedCategories.isNotEmpty ? loadedCategories.first.name : "No categories"}');
+      categories.value = loadedCategories;
+      _logger.i('Categories list updated with ${categories.length} items');
     } catch (e) {
-      print('Error fetching categories: $e');
-      print('Error details: ${e.toString()}');
+      _logger.e('Error loading categories: $e');
     } finally {
       isLoading.value = false;
+      _logger.i('Loading completed. Categories count: ${categories.length}');
     }
   }
 
   void toggleCategory(CategoryModel category) {
-    if (selectedCategories.contains(category)) {
-      selectedCategories.remove(category);
+    _logger.i('Toggling category: ${category.name}');
+    final index = selectedCategories.indexWhere((selected) => selected.id == category.id);
+    
+    print('DEBUG: Category ID: ${category.id}');
+    print('DEBUG: Selected categories count: ${selectedCategories.length}');
+    print('DEBUG: Found at index: $index');
+    
+    if (index >= 0) {
+      selectedCategories.removeAt(index);
+      _logger.i('Category removed from selection');
+      print('DEBUG: Category removed. New count: ${selectedCategories.length}');
     } else {
       selectedCategories.add(category);
+      _logger.i('Category added to selection');
+      print('DEBUG: Category added. New count: ${selectedCategories.length}');
     }
+    
+    // Force UI update
+    selectedCategories.refresh();
   }
 
   bool isCategorySelected(CategoryModel category) {
-    return selectedCategories.contains(category);
+    final isSelected = selectedCategories.any((selected) => selected.id == category.id);
+    print('DEBUG: Checking if ${category.name} (${category.id}) is selected: $isSelected');
+    return isSelected;
   }
 } 

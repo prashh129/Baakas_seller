@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'brand_model.dart';
 import 'product_attribute_model.dart';
 import 'product_variation_model.dart';
 
@@ -15,7 +14,6 @@ class ProductModel {
   double salePrice;
   String thumbnail;
   bool? isFeatured;
-  BrandModel? brand;
   String? categoryId;
   String productType;
   String? description;
@@ -31,8 +29,6 @@ class ProductModel {
     required this.thumbnail,
     required this.productType,
     this.soldQuantity = 0,
-    this.sku,
-    this.brand,
     this.date,
     this.images,
     this.salePrice = 0.0,
@@ -58,7 +54,6 @@ class ProductModel {
       'SalePrice': salePrice,
       'IsFeatured': isFeatured,
       'CategoryId': categoryId,
-      'Brand': brand!.toJson(),
       'Description': description,
       'ProductType': productType,
       'SoldQuantity': soldQuantity,
@@ -76,7 +71,6 @@ class ProductModel {
       id: document.id,
       title: data['title'] ?? '',
       price: double.parse((data['price'] ?? 0.0).toString()),
-      sku: data['sku'] ?? '',
       stock: data['totalStock'] ?? 0,
       soldQuantity: data['soldQuantity'] ?? 0,
       isFeatured: data['isFeatured'] ?? false,
@@ -109,7 +103,6 @@ class ProductModel {
       id: document.id,
       title: data['title'] ?? '',
       price: double.parse((data['price'] ?? 0.0).toString()),
-      sku: data['sku'] ?? '',
       stock: data['totalStock'] ?? 0,
       soldQuantity: data['soldQuantity'] ?? 0,
       isFeatured: data['isFeatured'] ?? false,

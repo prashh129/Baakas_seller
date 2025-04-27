@@ -37,8 +37,8 @@ class BaakasCircularIcon extends StatelessWidget {
         color: backgroundColor != null
             ? backgroundColor!
             : BaakasHelperFunctions.isDarkMode(context)
-                ? BaakasColors.black.withOpacity(0.9)
-                : BaakasColors.white.withOpacity(0.9),
+                ? BaakasColors.black.withValues(alpha: 230)
+                : BaakasColors.white.withValues(alpha: 230),
         borderRadius: BorderRadius.circular(100),
       ),
       child: IconButton(

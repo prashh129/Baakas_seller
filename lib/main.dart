@@ -8,6 +8,7 @@ import 'app.dart';
 import 'data/repositories/authentication/authentication_repository.dart';
 import 'firebase_options.dart';
 import 'features/settings/controllers/language_controller.dart';
+import 'features/shop/controllers/category_controller.dart';
 
 /// -- Entry point of Flutter App
 Future<void> main() async {
@@ -65,6 +66,15 @@ Future<void> main() async {
       debugPrint("LanguageController initialized");
     } catch (e) {
       debugPrint("LanguageController initialization failed: $e");
+    }
+
+    // Initialize CategoryController
+    try {
+      final categoryController = CategoryController();
+      Get.put(categoryController);
+      debugPrint("CategoryController initialized");
+    } catch (e) {
+      debugPrint("CategoryController initialization failed: $e");
     }
 
     // Run the app

@@ -45,19 +45,19 @@ class CategoryModel {
       // Map JSON Record to the Model
       return CategoryModel(
         id: document.id,
-        name: data['name'] ?? '',
-        description: data['description'],
-        image: data['image'],
-        isActive: data['isActive'] ?? true,
-        isFeatured: data['isFeatured'] ?? false,
-        parentId: data['parentId'] ?? '',
+        name: data['Name'] ?? '',
+        description: data['Description'],
+        image: data['Image'],
+        isActive: data['IsActive'] ?? true,
+        isFeatured: data['IsFeatured'] ?? false,
+        parentId: data['ParentId'] ?? '',
       );
     } else {
       return CategoryModel.empty();
     }
   }
 
-  factory CategoryModel.fromFirestore(DocumentSnapshot doc) {
+  factory CategoryModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data() as Map<String, dynamic>;
     print('Parsing category document: ${doc.id}');
     print('Category data: $data');
@@ -78,12 +78,12 @@ class CategoryModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'name': name,
-      'description': description,
-      'image': image,
-      'isActive': isActive,
-      'isFeatured': isFeatured,
-      'parentId': parentId,
+      'Name': name,
+      'Description': description,
+      'Image': image,
+      'IsActive': isActive,
+      'IsFeatured': isFeatured,
+      'ParentId': parentId,
     };
   }
 }

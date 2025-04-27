@@ -5,7 +5,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../features/personalization/controllers/user_controller.dart';
 import '../../../utils/constants/image_strings.dart';
-import '../images/Baakas_circular_image.dart';
+import '../images/baakas_circular_image.dart';
 
 class BaakasUserProfileTile extends StatelessWidget {
   BaakasUserProfileTile({
@@ -19,9 +19,9 @@ class BaakasUserProfileTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final isNetworkImage = controller.user.value.profilePicture.isNotEmpty;
+      final isNetworkImage = controller.user.value.profilePicture?.isNotEmpty ?? false;
       final image = isNetworkImage
-          ? controller.user.value.profilePicture
+          ? controller.user.value.profilePicture ?? BaakasImages.user
           : BaakasImages.user;
       return ListTile(
         leading: BaakasCircularImage(

@@ -1,78 +1,97 @@
 import 'package:flutter/material.dart';
 import 'package:baakas_seller/utils/constants/colors.dart';
+import 'package:baakas_seller/utils/constants/sizes.dart';
+import 'package:iconsax/iconsax.dart';
 
-class OrderFilterBar extends StatefulWidget {
-  final Function(String) onFilterChanged;
+class OrderFilterBar extends StatelessWidget {
+  final String selectedFilter;
+  final Function(String) onFilterSelected;
   final bool isDark;
 
   const OrderFilterBar({
     super.key,
-    required this.onFilterChanged,
+    required this.selectedFilter,
+    required this.onFilterSelected,
     required this.isDark,
   });
-
-  @override
-  State<OrderFilterBar> createState() => _OrderFilterBarState();
-}
-
-class _OrderFilterBarState extends State<OrderFilterBar> {
-  String selectedFilter = 'all';
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
       case 'pending':
         return Colors.orange;
-      case 'shipped':
+      case 'processing':
         return Colors.blue;
+      case 'shipped':
+        return Colors.purple;
       case 'delivered':
         return Colors.green;
       case 'canceled':
         return Colors.red;
       default:
-        return BaakasColors.primaryColor;
+        return Colors.grey;
+    }
+  }
+
+  IconData _getStatusIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return Iconsax.timer_1;
+      case 'processing':
+        return Iconsax.box_1;
+      case 'shipped':
+        return Iconsax.truck;
+      case 'delivered':
+        return Iconsax.verify;
+      case 'canceled':
+        return Iconsax.close_circle;
+      default:
+        return Iconsax.box;
     }
   }
 
   Widget _buildFilterChip(String label, String value) {
     final isSelected = selectedFilter == value;
     final color = _getStatusColor(value);
+    final icon = _getStatusIcon(value);
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(
-          label,
-          style: TextStyle(
-            color:
-                isSelected
-                    ? (widget.isDark ? Colors.white : Colors.black)
-                    : Colors.grey[400],
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
+    return FilterChip(
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: isSelected ? Colors.white : color,
           ),
-        ),
-        selected: isSelected,
-        onSelected: (_) {
-          setState(() => selectedFilter = value);
-          widget.onFilterChanged(value);
-        },
-        backgroundColor: widget.isDark ? const Color(0xFF1E1E1E) : Colors.grey[100],
-        selectedColor: color.withOpacity(0.3),
-        checkmarkColor: Colors.transparent,
-        showCheckmark: false,
-        elevation: 0,
-        pressElevation: 0,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(6),
-          side: BorderSide(
-            color:
-                isSelected
-                    ? color
-                    : (widget.isDark ? Colors.grey[800]! : Colors.grey[300]!),
-            width: 1,
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : color,
+              fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+            ),
           ),
+        ],
+      ),
+      selected: isSelected,
+      onSelected: (selected) {
+        if (selected) {
+          onFilterSelected(value);
+        }
+      },
+      backgroundColor: color.withOpacity(0.1),
+      selectedColor: color,
+      checkmarkColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: isSelected ? color : Colors.transparent,
+          width: 1,
         ),
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: BaakasSizes.sm,
+        vertical: BaakasSizes.xs,
       ),
     );
   }
@@ -81,12 +100,22 @@ class _OrderFilterBarState extends State<OrderFilterBar> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(
+        horizontal: BaakasSizes.md,
+        vertical: BaakasSizes.sm,
+      ),
       child: Row(
         children: [
           _buildFilterChip('All', 'all'),
+          const SizedBox(width: BaakasSizes.sm),
           _buildFilterChip('Pending', 'pending'),
+          const SizedBox(width: BaakasSizes.sm),
+          _buildFilterChip('Processing', 'processing'),
+          const SizedBox(width: BaakasSizes.sm),
           _buildFilterChip('Shipped', 'shipped'),
+          const SizedBox(width: BaakasSizes.sm),
           _buildFilterChip('Delivered', 'delivered'),
+          const SizedBox(width: BaakasSizes.sm),
           _buildFilterChip('Canceled', 'canceled'),
         ],
       ),

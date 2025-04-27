@@ -21,7 +21,7 @@ class CouponCreation extends StatelessWidget {
                 size: 64,
                 color: Theme.of(
                   context,
-                ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
               ),
               const SizedBox(height: 16),
               Text(
@@ -29,7 +29,7 @@ class CouponCreation extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: Theme.of(
                     context,
-                  ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                  ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
                 ),
               ),
               const SizedBox(height: 8),
@@ -38,7 +38,7 @@ class CouponCreation extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(
                     context,
-                  ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                  ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -68,7 +68,7 @@ class CouponCreation extends StatelessWidget {
                       color:
                           isHovered
                               // ignore: dead_code
-                              ? Theme.of(context).primaryColor
+                              ? Theme.of(context).primaryColor.withValues(alpha: 51)
                               : Colors.transparent,
                       width: 2,
                     ),
@@ -79,7 +79,7 @@ class CouponCreation extends StatelessWidget {
                               BoxShadow(
                                 color: Theme.of(
                                   context,
-                                ).primaryColor.withOpacity(0.2),
+                                ).primaryColor.withValues(alpha: 89),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -100,7 +100,7 @@ class CouponCreation extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Theme.of(
                                 context,
-                              ).primaryColor.withOpacity(0.2),
+                              ).primaryColor.withValues(alpha: 51),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
@@ -128,7 +128,7 @@ class CouponCreation extends StatelessWidget {
                                         .textTheme
                                         .bodyLarge
                                         ?.color
-                                        ?.withOpacity(0.7),
+                                        ?.withValues(alpha: 179),
                                   ),
                                 ),
                                 Text(
@@ -140,7 +140,7 @@ class CouponCreation extends StatelessWidget {
                                         .textTheme
                                         .bodyLarge
                                         ?.color
-                                        ?.withOpacity(0.5),
+                                        ?.withValues(alpha: 128),
                                   ),
                                 ),
                               ],
@@ -163,7 +163,7 @@ class CouponCreation extends StatelessWidget {
                                       .textTheme
                                       .bodyLarge
                                       ?.color
-                                      ?.withOpacity(0.5),
+                                      ?.withValues(alpha: 128),
                                 ),
                               ),
                             ],

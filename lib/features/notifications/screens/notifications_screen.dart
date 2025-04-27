@@ -10,7 +10,7 @@ class NotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(NotificationsController());
+    Get.put(NotificationsController());
 
     return DefaultTabController(
       length: 2,
@@ -31,7 +31,7 @@ class NotificationsScreen extends StatelessWidget {
                     labelColor: Theme.of(context).textTheme.bodyLarge?.color,
                     unselectedLabelColor: Theme.of(
                       context,
-                    ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                    ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
                     indicatorColor: Theme.of(context).primaryColor,
                     tabs: const [
                       Tab(icon: Icon(Iconsax.shopping_cart), text: 'Orders'),

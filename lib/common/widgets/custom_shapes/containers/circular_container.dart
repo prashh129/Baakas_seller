@@ -19,12 +19,12 @@ class BaakasCircularContainer extends StatelessWidget {
     super.key,
     this.child,
     this.margin,
-    this.padding,
+    this.padding = 0,
     this.width = 400,
     this.height = 400,
     this.radius = 400,
     this.showBorder = false,
-    this.backgroundColor = BaakasColors.white,
+    this.backgroundColor = Colors.white,
     this.borderColor = BaakasColors.borderPrimary,
   });
 
@@ -36,7 +36,7 @@ class BaakasCircularContainer extends StatelessWidget {
   final Color borderColor;
   final Color backgroundColor;
   final EdgeInsetsGeometry? margin;
-  final EdgeInsetsGeometry? padding;
+  final double padding;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class BaakasCircularContainer extends StatelessWidget {
       width: width,
       height: height,
       margin: margin,
-      padding: padding,
+      padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(radius),

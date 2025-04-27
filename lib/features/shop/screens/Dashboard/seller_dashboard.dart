@@ -2,7 +2,7 @@
 // import 'package:baakas_seller/features/shop/screens/Dashboard/features/ManageProductsScreen%20.dart';
 // import 'package:baakas_seller/features/shop/screens/Dashboard/features/SellerOrdersScreen.dart';
 // import 'package:baakas_seller/features/shop/screens/Dashboard/features/WithdrawFundsScreen.dart';
-// import 'package:baakas_seller/features/shop/screens/upload_image/UploadProductImageScreen.dart';
+// import 'package:baakas_seller/features/shop/screens/upload_image/upload_product_image_screen.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:iconsax/iconsax.dart';

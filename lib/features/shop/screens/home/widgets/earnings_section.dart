@@ -12,12 +12,17 @@ class EarningsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(EarningsController());
+    final isDark = BaakasHelperFunctions.isDarkMode(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Weekly Earnings Graph
         Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(BaakasSizes.cardRadiusLg),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(BaakasSizes.defaultSpace),
             child: Column(
@@ -25,7 +30,9 @@ class EarningsSection extends StatelessWidget {
               children: [
                 Text(
                   'Weekly Earnings',
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: BaakasSizes.spaceBtwItems),
                 Obx(() {
@@ -59,9 +66,10 @@ class EarningsSection extends StatelessWidget {
                                         padding: const EdgeInsets.only(top: 8.0),
                                         child: Text(
                                           '${date.month}/${date.day}',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
+                                            color: isDark ? BaakasColors.white : BaakasColors.dark,
                                           ),
                                         ),
                                       );
@@ -100,13 +108,13 @@ class EarningsSection extends StatelessWidget {
                                 Icon(
                                   Icons.bar_chart,
                                   size: 48,
-                                  color: BaakasColors.primaryColor.withOpacity(0.3),
+                                  color: BaakasColors.primaryColor.withValues(alpha: 77),
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'No earnings data yet',
                                   style: TextStyle(
-                                    color: Colors.grey[600],
+                                    color: isDark ? BaakasColors.white : BaakasColors.dark,
                                     fontSize: 14,
                                   ),
                                 ),
@@ -114,7 +122,7 @@ class EarningsSection extends StatelessWidget {
                                 Text(
                                   'Start selling to see your earnings',
                                   style: TextStyle(
-                                    color: Colors.grey[500],
+                                    color: isDark ? BaakasColors.white.withValues(alpha: 128) : BaakasColors.dark.withValues(alpha: 128),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -137,24 +145,42 @@ class EarningsSection extends StatelessWidget {
             // Total Earnings Card
             Expanded(
               child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(BaakasSizes.cardRadiusLg),
+                ),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(BaakasSizes.defaultSpace),
+                  decoration: BoxDecoration(
+                    color: isDark ? BaakasColors.dark : BaakasColors.white,
+                    borderRadius: BorderRadius.circular(BaakasSizes.cardRadiusLg),
+                    border: Border.all(
+                      color: isDark ? BaakasColors.darkGrey : BaakasColors.grey.withValues(alpha: 51),
+                    ),
+                  ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Total Earnings',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        'Revenue',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: isDark ? BaakasColors.white : BaakasColors.dark,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: BaakasSizes.spaceBtwItems),
-                      Obx(() => Text(
-                        'Rs ${BaakasHelperFunctions.formatNumber(controller.totalEarnings)}',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: BaakasColors.primaryColor,
-                        ),
-                      )),
+                      Flexible(
+                        child: Obx(() => Text(
+                          'Rs ${BaakasHelperFunctions.formatNumber(controller.totalEarnings)}',
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: BaakasColors.primaryColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        )),
+                      ),
                     ],
                   ),
                 ),
@@ -164,24 +190,42 @@ class EarningsSection extends StatelessWidget {
             // Pending Earnings Card
             Expanded(
               child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(BaakasSizes.cardRadiusLg),
+                ),
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(BaakasSizes.defaultSpace),
+                  decoration: BoxDecoration(
+                    color: isDark ? BaakasColors.dark : BaakasColors.white,
+                    borderRadius: BorderRadius.circular(BaakasSizes.cardRadiusLg),
+                    border: Border.all(
+                      color: isDark ? BaakasColors.darkGrey : BaakasColors.grey.withValues(alpha: 51),
+                    ),
+                  ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Pending',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          color: isDark ? BaakasColors.white : BaakasColors.dark,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: BaakasSizes.spaceBtwItems),
-                      Obx(() => Text(
-                        'Rs ${BaakasHelperFunctions.formatNumber(controller.pendingEarnings)}',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: BaakasColors.warning,
-                        ),
-                      )),
+                      Flexible(
+                        child: Obx(() => Text(
+                          'Rs ${BaakasHelperFunctions.formatNumber(controller.pendingEarnings)}',
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: BaakasColors.warning,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        )),
+                      ),
                     ],
                   ),
                 ),

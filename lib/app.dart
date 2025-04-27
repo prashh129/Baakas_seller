@@ -1,10 +1,8 @@
-import 'package:baakas_seller/features/shop/screens/home/home.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'bindings/general_bindings.dart';
-import 'routes/app_routes.dart';
-import 'utils/theme/theme.dart';
-import 'features/settings/controllers/language_controller.dart';
+import 'navigation/navigation_menu.dart';
+import 'data/repositories/authentication/authentication_repository.dart';
+import 'features/authentication/screens/login/login.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -12,29 +10,30 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Baakas Seller',
       debugShowCheckedModeBanner: false,
-      theme: BaakasAppTheme.lightTheme,
-      darkTheme: BaakasAppTheme.darkTheme,
+      title: 'Baakas Seller',
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF1E88E5),
+          brightness: Brightness.light,
+        ),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF1E88E5),
+          brightness: Brightness.dark,
+        ),
+      ),
       themeMode: ThemeMode.system,
-      // Force dark mode to follow system theme
-      builder: (context, child) {
-        final brightness = MediaQuery.of(context).platformBrightness;
-        final isDarkMode = brightness == Brightness.dark;
-        return Theme(
-          data:
-              isDarkMode ? BaakasAppTheme.darkTheme : BaakasAppTheme.lightTheme,
-          child: child!,
-        );
-      },
-      initialBinding: GeneralBindings(),
-      getPages: AppRoutes.pages,
-      translations: Messages(),
-      locale: const Locale('en', 'US'),
-      fallbackLocale: const Locale('en', 'US'),
-
-      /// Seller app starts directly on SellerDashboard.
-      home: const HomeScreen(),
+      home: Obx(() {
+        final authRepo = AuthenticationRepository.instance;
+        if (authRepo.firebaseUser == null) {
+          return const LoginScreen();
+        }
+        return const NavigationMenu();
+      }),
     );
   }
 }

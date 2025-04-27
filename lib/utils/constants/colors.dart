@@ -18,7 +18,7 @@ class BaakasColors {
 
   // Background Container colors
   static const Color lightContainer = Color(0xFFF6F6F6);
-  static Color darkContainer = BaakasColors.white.withOpacity(0.1);
+  static Color darkContainer = BaakasColors.white.withValues(alpha: 26);
 
   // Button colors
   static const Color buttonPrimary = Colors.green;
@@ -43,4 +43,7 @@ class BaakasColors {
   static const Color softGrey = Color(0xFFF4F4F4);
   static const Color lightGrey = Color(0xFFF9F9F9);
   static const Color white = Color(0xFFFFFFFF);
+
+  // Add secondaryColor
+  static const Color secondaryColor = Color(0xFF6B4CE6);
 }

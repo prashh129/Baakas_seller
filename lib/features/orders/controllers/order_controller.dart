@@ -7,6 +7,7 @@ class OrderController extends GetxController {
   final RxList<Order> orders = <Order>[].obs;
   final RxList<Order> filteredOrders = <Order>[].obs;
   final RxBool isLoading = false.obs;
+  final RxString selectedFilter = 'all'.obs;
 
   @override
   void onInit() {
@@ -57,6 +58,7 @@ class OrderController extends GetxController {
   }
 
   void filterOrders(String status) {
+    selectedFilter.value = status;
     if (status.isEmpty || status == 'all') {
       filteredOrders.value = orders;
       return;

@@ -60,7 +60,7 @@ class MessageBubble extends StatelessWidget {
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color:
                           isMe
-                              ? BaakasColors.white.withOpacity(0.7)
+                              ? BaakasColors.white.withValues(alpha: 179)
                               : BaakasColors.grey,
                     ),
                   ),

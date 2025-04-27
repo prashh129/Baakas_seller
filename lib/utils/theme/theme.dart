@@ -28,16 +28,14 @@ class BaakasAppTheme {
     elevatedButtonTheme: BaakasElevatedButtonTheme.lightElevatedButtonTheme,
     outlinedButtonTheme: BaakasOutlinedButtonTheme.lightOutlinedButtonTheme,
     inputDecorationTheme: BaakasTextFormFieldTheme.lightInputDecorationTheme,
-    colorScheme: ColorScheme.light(
+    colorScheme: const ColorScheme.light(
       primary: BaakasColors.primaryColor,
       secondary: BaakasColors.secondary,
       surface: BaakasColors.white,
-      background: BaakasColors.white,
       error: BaakasColors.error,
       onPrimary: BaakasColors.white,
       onSecondary: BaakasColors.white,
       onSurface: BaakasColors.black,
-      onBackground: BaakasColors.black,
       onError: BaakasColors.white,
     ),
   );
@@ -57,16 +55,14 @@ class BaakasAppTheme {
     elevatedButtonTheme: BaakasElevatedButtonTheme.darkElevatedButtonTheme,
     outlinedButtonTheme: BaakasOutlinedButtonTheme.darkOutlinedButtonTheme,
     inputDecorationTheme: BaakasTextFormFieldTheme.darkInputDecorationTheme,
-    colorScheme: ColorScheme.dark(
+    colorScheme: const ColorScheme.dark(
       primary: BaakasColors.primaryColor,
       secondary: BaakasColors.secondary,
       surface: BaakasColors.dark,
-      background: BaakasColors.dark,
       error: BaakasColors.error,
       onPrimary: BaakasColors.white,
       onSecondary: BaakasColors.white,
       onSurface: BaakasColors.white,
-      onBackground: BaakasColors.white,
       onError: BaakasColors.white,
     ),
   );

@@ -9,6 +9,7 @@ import '../../../utils/exceptions/firebase_exceptions.dart';
 import '../../../utils/exceptions/format_exceptions.dart';
 import '../../../utils/exceptions/platform_exceptions.dart';
 import '../authentication/authentication_repository.dart';
+import 'package:flutter/foundation.dart';
 
 /// Repository class for user-related operations.
 class UserRepository extends GetxController {
@@ -35,24 +36,27 @@ class UserRepository extends GetxController {
   /// Function to fetch user details based on user ID.
   Future<UserModel> fetchUserDetails() async {
     try {
-      final documentSnapshot =
-          await _db
-              .collection("Sellers")
-              .doc(AuthenticationRepository.instance.getUserID)
-              .get();
-      if (documentSnapshot.exists) {
-        return UserModel.fromSnapshot(documentSnapshot);
-      } else {
-        return UserModel.empty();
+      final userId = AuthenticationRepository.instance.getUserID;
+      debugPrint('Attempting to fetch user details for ID: $userId');
+      
+      if (userId.isEmpty) {
+        debugPrint('Error: User ID is empty');
+        throw 'Unable to find user information.';
       }
-    } on FirebaseException catch (e) {
-      throw BaakasFirebaseException(e.code).message;
-    } on FormatException catch (_) {
-      throw const BaakasFormatException();
-    } on PlatformException catch (e) {
-      throw BaakasPlatformException(e.code).message;
+
+      debugPrint('Querying Firestore collection: Sellers, document: $userId');
+      final userSnapshot = await _db.collection('Sellers').doc(userId).get();
+      
+      if (!userSnapshot.exists) {
+        debugPrint('Error: No document found for user ID: $userId');
+        throw 'User not found.';
+      }
+
+      debugPrint('Document found, data: ${userSnapshot.data()}');
+      return UserModel.fromSnapshot(userSnapshot);
     } catch (e) {
-      throw 'Something went wrong. Please try again';
+      debugPrint('Exception in fetchUserDetails: $e');
+      throw 'Something went wrong while fetching user information. $e';
     }
   }
 

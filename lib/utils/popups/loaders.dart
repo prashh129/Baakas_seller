@@ -21,8 +21,8 @@ class BaakasLoaders {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
             color: BaakasHelperFunctions.isDarkMode(Get.context!)
-                ? BaakasColors.darkerGrey.withOpacity(0.9)
-                : BaakasColors.grey.withOpacity(0.9),
+                ? BaakasColors.darkerGrey.withValues(alpha: 230)
+                : BaakasColors.grey.withValues(alpha: 230),
           ),
           child: Center(
               child: Text(message,

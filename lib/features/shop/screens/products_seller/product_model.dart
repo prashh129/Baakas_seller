@@ -4,7 +4,7 @@ class ProductModelSeller {
   final String id;
   final String title;
   final List<String> images;
-  String status;
+  String status; // Can be "pending", "approved", or "rejected"
   final int stock;
   final Map<String, dynamic> variants;
   bool isFeatured;
@@ -19,7 +19,9 @@ class ProductModelSeller {
   final String? productType;
   final int soldQuantity;
   final DateTime? createdAt;
+  final DateTime? updatedAt;
   final String? sellerId;
+  final String? rejectionReason; // Added to store rejection reason if any
 
   ProductModelSeller({
     required this.id,
@@ -40,7 +42,9 @@ class ProductModelSeller {
     this.productType,
     this.soldQuantity = 0,
     this.createdAt,
+    this.updatedAt,
     this.sellerId,
+    this.rejectionReason,
   });
 
   factory ProductModelSeller.fromFirestore(DocumentSnapshot doc) {
@@ -49,7 +53,7 @@ class ProductModelSeller {
       id: doc.id,
       title: data['title'] ?? '',
       images: List<String>.from(data['images'] ?? []),
-      status: data['status'] ?? '',
+      status: data['status'] ?? 'pending',
       stock: data['totalStock'] ?? 0,
       variants: data['variants'] ?? {},
       isFeatured: data['isFeatured'] ?? false,
@@ -64,7 +68,9 @@ class ProductModelSeller {
       productType: data['productType'],
       soldQuantity: data['soldQuantity'] ?? 0,
       createdAt: data['createdAt']?.toDate(),
+      updatedAt: data['updatedAt']?.toDate(),
       sellerId: data['sellerId'],
+      rejectionReason: data['rejectionReason'],
     );
   }
 
@@ -87,7 +93,9 @@ class ProductModelSeller {
       'productType': productType,
       'soldQuantity': soldQuantity,
       'createdAt': createdAt,
+      'updatedAt': updatedAt,
       'sellerId': sellerId,
+      'rejectionReason': rejectionReason,
     };
   }
 }

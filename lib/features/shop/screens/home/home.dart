@@ -1,4 +1,3 @@
-import 'package:baakas_seller/features/shop/controllers/product/product_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -6,32 +5,41 @@ import '../../../../common/widgets/custom_shapes/containers/primary_header_conta
 import '../../../../common/widgets/cards/section_card.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/device/device_utility.dart';
+import '../../../../utils/constants/colors.dart';
+import '../../../../utils/helpers/helper_functions.dart';
 import 'widgets/home_appbar.dart';
 import '../../../reviews/screens/reviews_screen.dart';
 import '../../../promotions/screens/promotions_screen.dart';
-import '../../../notifications/screens/notifications_screen.dart';
 import '../../../support/screens/help_center_screen.dart';
 import 'widgets/earnings_section.dart';
-
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ProductController());
+    final isDark = BaakasHelperFunctions.isDarkMode(context);
+    
     return Scaffold(
+      backgroundColor: isDark ? BaakasColors.dark : BaakasColors.light,
       body: SingleChildScrollView(
         child: Column(
           children: [
             /// Header
-            const BaakasPrimaryHeaderContainer(
+            Container(
+              decoration: BoxDecoration(
+                color: BaakasColors.primaryColor,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(BaakasSizes.cardRadiusLg),
+                  bottomRight: Radius.circular(BaakasSizes.cardRadiusLg),
+                ),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   /// -- Appbar
-                  BaakasHomeAppBar(),
-                  SizedBox(height: BaakasSizes.spaceBtwSections),
+                  const BaakasHomeAppBar(),
+                  const SizedBox(height: BaakasSizes.spaceBtwSections),
                 ],
               ),
             ),
@@ -42,7 +50,7 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  /// -- Earnings Section (replacing Promo Slider)
+                  /// -- Earnings Section
                   const EarningsSection(),
                   const SizedBox(height: BaakasSizes.spaceBtwSections),
 
@@ -65,15 +73,6 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: BaakasSizes.spaceBtwSections),
 
-                  // Notifications Section
-                  BaakasSectionCard(
-                    title: 'Notifications & Alerts',
-                    subtitle: 'View order updates, stock alerts, and messages',
-                    icon: Iconsax.notification,
-                    onTap: () => Get.to(() => const NotificationsScreen()),
-                  ),
-                  const SizedBox(height: BaakasSizes.spaceBtwSections),
-
                   // Help Center Section
                   BaakasSectionCard(
                     title: 'Help Center',
@@ -83,16 +82,8 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: BaakasSizes.spaceBtwSections),
 
-                  // // Analytics Sections
-                  // const MetricsGrid(),
-                  // const SizedBox(height: BaakasSizes.spaceBtwSections),
-                  // const RevenueCard(),
-                  // const SizedBox(height: BaakasSizes.spaceBtwSections),
-                  // const CustomerInsights(),
                   SizedBox(
-                    height:
-                        BaakasDeviceUtils.getBottomNavigationBarHeight() +
-                        BaakasSizes.defaultSpace,
+                    height: BaakasDeviceUtils.getBottomNavigationBarHeight() + BaakasSizes.defaultSpace,
                   ),
                 ],
               ),

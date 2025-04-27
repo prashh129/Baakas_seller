@@ -49,7 +49,7 @@ class ChatScreen extends StatelessWidget {
                       isBuyer
                           ? Theme.of(
                             context,
-                          ).colorScheme.primary.withOpacity(0.1)
+                          ).colorScheme.primary.withValues(alpha: 26)
                           : Colors.grey.shade200,
                   borderRadius: BorderRadius.only(
                     topLeft: const Radius.circular(16),

@@ -17,7 +17,7 @@ class BaakasCurvedEdgesWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipPath(
       // Use the custom clipper to create curved edges
-      clipper: BaakasCustomCurvedEdges(),
+      clipper: BaakasCurvedEdges(),
       child: child,
     );
   }

@@ -8,7 +8,7 @@ import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../features/authentication/screens/login/login.dart';
 import '../../../features/authentication/screens/signup/verify_email.dart';
-import '../../../home_menu.dart';
+import '../../../navigation/navigation_menu.dart';
 import '../../../utils/exceptions/firebase_auth_exceptions.dart';
 import '../../../utils/exceptions/firebase_exceptions.dart';
 import '../../../utils/exceptions/format_exceptions.dart';
@@ -62,12 +62,12 @@ class AuthenticationRepository extends GetxController {
         // Initialize User Specific Storage
         try {
           await BaakasLocalStorage.init(user.uid);
-          Get.offAll(() => const HomeMenu());
+          Get.offAll(() => const NavigationMenu());
         } catch (e) {
           debugPrint("Error initializing storage: $e");
           // Fallback to default storage
           await BaakasLocalStorage.init('baakas_default');
-          Get.offAll(() => const HomeMenu());
+          Get.offAll(() => const NavigationMenu());
         }
       } else {
         Get.offAll(() => VerifyEmailScreen(email: getUserEmail));
@@ -87,19 +87,27 @@ class AuthenticationRepository extends GetxController {
     String password,
   ) async {
     try {
-      return await _auth.signInWithEmailAndPassword(
+      _logger.i('Attempting to login user with email: $email');
+      final userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+      _logger.i('Successfully logged in user: ${userCredential.user?.uid}');
+      return userCredential;
     } on FirebaseAuthException catch (e) {
+      _logger.e('Firebase Auth Error during login: ${e.code} - ${e.message}');
       throw BaakasFirebaseAuthException(e.code).message;
     } on FirebaseException catch (e) {
+      _logger.e('Firebase Error during login: ${e.code} - ${e.message}');
       throw BaakasFirebaseException(e.code).message;
-    } on FormatException catch (_) {
+    } on FormatException catch (e) {
+      _logger.e('Format Error during login: $e');
       throw const BaakasFormatException();
     } on PlatformException catch (e) {
+      _logger.e('Platform Error during login: ${e.code} - ${e.message}');
       throw BaakasPlatformException(e.code).message;
     } catch (e) {
+      _logger.e('Unexpected error during login: $e');
       throw 'Something went wrong. Please try again';
     }
   }

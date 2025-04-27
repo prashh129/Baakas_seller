@@ -1,4 +1,3 @@
-
 import 'package:baakas_seller/utils/constants/enums.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -80,9 +79,15 @@ class SignupController extends GetxController {
         email: email.text.trim(),
         phoneNumber: phoneNumber.text.trim(),
         profilePicture: '',
-        gender: selectedGender.value,
-        dateOfBirth: dateOfBirthController.text.trim(),
-        role: AppRole.seller, //  Added this line for seller
+        address: '',
+        role: AppRole.seller,
+        isEmailVerified: false,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        bio: null,
+        website: null,
+        socialLinks: {},
+        preferences: {},
       );
 
       await UserController.instance.saveUserRecord(user: newUser);

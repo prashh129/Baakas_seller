@@ -1,9 +1,10 @@
-import 'package:baakas_seller/common/widgets/account_setting/accountPrivacyScreen.dart';
-import 'package:baakas_seller/common/widgets/account_setting/bankAcccountScreen.dart';
+import 'package:baakas_seller/common/widgets/account_setting/account_privacy_screen.dart';
+import 'package:baakas_seller/common/widgets/account_setting/bank_account_screen.dart';
 import 'package:baakas_seller/common/widgets/account_setting/notification_screen_setting.dart';
-import 'package:baakas_seller/features/personalization/screens/document/DocumentsUploadScreen.dart';
+import 'package:baakas_seller/features/personalization/screens/document/documents_upload_screen.dart';
 import 'package:baakas_seller/features/settings_language/screens/language_screen.dart';
 import 'package:baakas_seller/features/settings/controllers/language_controller.dart';
+import 'package:baakas_seller/navigation/navigation_menu.dart';
 import '../../../../common/widgets/list_tiles/user_profile_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,13 +13,11 @@ import '../../../../common/widgets/appbar/appbar.dart';
 import '../../../../common/widgets/custom_shapes/containers/primary_header_container.dart';
 import '../../../../common/widgets/list_tiles/settings_menu_tile.dart';
 import '../../../../common/widgets/texts/section_heading.dart';
-import '../../../../home_menu.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../controllers/user_controller.dart';
 import '../address/address.dart';
 import '../profile/profile.dart';
-import 'upload_data.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -30,7 +29,7 @@ class SettingsScreen extends StatelessWidget {
     return PopScope(
       canPop: false,
       // Intercept the back button press and redirect to Home Screen
-      onPopInvoked: (value) async => Get.offAll(const HomeMenu()),
+      onPopInvoked: (value) async => Get.offAll(() => const NavigationMenu()),
       child: Scaffold(
         body: SingleChildScrollView(
           child: Column(
@@ -164,15 +163,7 @@ class SettingsScreen extends StatelessWidget {
                       title: languageController.translate('App Settings'),
                       showActionButton: false,
                     ),
-                    const SizedBox(height: BaakasSizes.spaceBtwItems),
-                    BaakasSettingsMenuTile(
-                      icon: Iconsax.document_upload,
-                      title: languageController.translate('Load Data'),
-                      subTitle: languageController.translate(
-                        'Upload Data to your Cloud Firebase',
-                      ),
-                      onTap: () => Get.to(() => const UploadDataScreen()),
-                    ),
+                    
                     const SizedBox(height: BaakasSizes.spaceBtwItems),
                     BaakasSettingsMenuTile(
                       icon: Iconsax.location,

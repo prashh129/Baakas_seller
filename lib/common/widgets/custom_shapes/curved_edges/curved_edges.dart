@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Custom clipper for creating a path with curved edges.
-class BaakasCustomCurvedEdges extends CustomClipper<Path> {
+class BaakasCurvedEdges extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     var path = Path();

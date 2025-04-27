@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../../utils/constants/colors.dart';
 import '../../../../utils/constants/sizes.dart';
 import '../../../utils/helpers/helper_functions.dart';
-import '../images/Baakas_circular_image.dart';
+import '../images/baakas_circular_image.dart';
 
 /// A widget that displays an image with text below it in a vertical arrangement.
 class BaakasVerticalImageAndText extends StatelessWidget {

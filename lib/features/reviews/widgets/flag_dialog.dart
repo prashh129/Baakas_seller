@@ -100,6 +100,7 @@ class _FlagDialogState extends State<FlagDialog> {
                           'flagTimestamp': FieldValue.serverTimestamp(),
                         })
                         .then((_) {
+                          if (!mounted) return;
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
@@ -109,6 +110,7 @@ class _FlagDialogState extends State<FlagDialog> {
                           );
                         })
                         .catchError((e) {
+                          if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Error flagging review: $e'),

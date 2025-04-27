@@ -357,7 +357,7 @@ class _ReviewCardState extends State<ReviewCard> {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: BaakasColors.primaryColor.withOpacity(0.1),
+                  backgroundColor: BaakasColors.primaryColor.withValues(alpha: 26),
                   child: const Icon(Iconsax.user),
                 ),
                 const SizedBox(width: BaakasSizes.spaceBtwItems),
@@ -418,7 +418,7 @@ class _ReviewCardState extends State<ReviewCard> {
               Container(
                 padding: const EdgeInsets.all(BaakasSizes.sm),
                 decoration: BoxDecoration(
-                  color: Colors.deepPurple.withOpacity(0.1),
+                  color: Colors.deepPurple.withValues(alpha: 26),
                   borderRadius: BorderRadius.circular(BaakasSizes.sm),
                 ),
                 child: Text(

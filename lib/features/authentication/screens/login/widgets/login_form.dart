@@ -89,7 +89,7 @@ class BaakasLoginForm extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => controller.emailAndPasswordSignIn(),
+                onPressed: () => controller.emailPasswordSignIn(),
                 child: const Text(BaakasTexts.signIn),
               ),
             ),
@@ -100,7 +100,7 @@ class BaakasLoginForm extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () => Get.to(() => const SignupScreen()),
-                child: const Text(BaakasTexts.createAccount),
+                child: Text(BaakasTexts.createAccount),
               ),
             ),
           ],

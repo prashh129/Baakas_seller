@@ -7,14 +7,14 @@ class BaakasChipTheme {
   static ChipThemeData lightChipTheme = ChipThemeData(
     checkmarkColor: BaakasColors.white,
     selectedColor: BaakasColors.primaryColor,
-    disabledColor: BaakasColors.grey.withOpacity(0.4),
+    disabledColor: BaakasColors.grey.withValues(alpha: 102),
     padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
     labelStyle: const TextStyle(
       color: BaakasColors.black,
       fontFamily: 'Poppins',
       fontSize: 14,
     ),
-    backgroundColor: BaakasColors.grey.withOpacity(0.2),
+    backgroundColor: BaakasColors.grey.withValues(alpha: 51),
   );
 
   static ChipThemeData darkChipTheme = ChipThemeData(
@@ -27,6 +27,6 @@ class BaakasChipTheme {
       fontFamily: 'Poppins',
       fontSize: 14,
     ),
-    backgroundColor: BaakasColors.darkGrey.withOpacity(0.2),
+    backgroundColor: BaakasColors.darkGrey.withValues(alpha: 51),
   );
 }

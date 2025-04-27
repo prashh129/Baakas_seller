@@ -44,14 +44,14 @@ class _CouponCreationDialogState extends State<CouponCreationDialog> {
                     labelStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(
                         context,
-                      ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                      ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color:
                             Theme.of(
                               context,
-                            ).textTheme.bodyLarge?.color?.withOpacity(0.3) ??
+                            ).textTheme.bodyLarge?.color?.withValues(alpha: 77) ??
                             Colors.grey,
                       ),
                     ),
@@ -83,13 +83,13 @@ class _CouponCreationDialogState extends State<CouponCreationDialog> {
                           ).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(
                               context,
-                            ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                            ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
                               color:
                                   Theme.of(context).textTheme.bodyLarge?.color
-                                      ?.withOpacity(0.3) ??
+                                      ?.withValues(alpha: 77) ??
                                   Colors.grey,
                             ),
                           ),
@@ -155,14 +155,14 @@ class _CouponCreationDialogState extends State<CouponCreationDialog> {
                     labelStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(
                         context,
-                      ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                      ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color:
                             Theme.of(
                               context,
-                            ).textTheme.bodyLarge?.color?.withOpacity(0.3) ??
+                            ).textTheme.bodyLarge?.color?.withValues(alpha: 77) ??
                             Colors.grey,
                       ),
                     ),
@@ -193,14 +193,14 @@ class _CouponCreationDialogState extends State<CouponCreationDialog> {
                     labelStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(
                         context,
-                      ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                      ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color:
                             Theme.of(
                               context,
-                            ).textTheme.bodyLarge?.color?.withOpacity(0.3) ??
+                            ).textTheme.bodyLarge?.color?.withValues(alpha: 77) ??
                             Colors.grey,
                       ),
                     ),
@@ -232,7 +232,7 @@ class _CouponCreationDialogState extends State<CouponCreationDialog> {
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: Theme.of(
                         context,
-                      ).textTheme.bodyLarge?.color?.withOpacity(0.5),
+                      ).textTheme.bodyLarge?.color?.withValues(alpha: 128),
                     ),
                   ),
                   trailing: IconButton(
@@ -284,7 +284,7 @@ class _CouponCreationDialogState extends State<CouponCreationDialog> {
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                           color: Theme.of(
                             context,
-                          ).textTheme.bodyLarge?.color?.withOpacity(0.7),
+                          ).textTheme.bodyLarge?.color?.withValues(alpha: 179),
                         ),
                       ),
                     ),

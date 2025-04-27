@@ -1,7 +1,7 @@
+import 'package:baakas_seller/features/orders/models/order_model.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:logger/logger.dart';
-import '../models/order_model.dart';
 import '../../../utils/constants/enums.dart';
 
 class EarningsController extends GetxController {
@@ -49,14 +49,27 @@ class EarningsController extends GetxController {
 
     for (var order in _orders) {
       if (order.status == OrderStatus.delivered) {
-        final daysSinceDelivery = now.difference(order.orderDate).inDays;
+        // Handle orderDate
+        DateTime orderDate;
+        try {
+          if (order.orderDate is String) {
+            orderDate = DateTime.parse(order.orderDate as String);
+          } else {
+            orderDate = order.orderDate as DateTime;
+          }
+        } catch (e) {
+          _logger.w('Invalid orderDate format: ${order.orderDate}');
+          continue;
+        }
+        
+        final daysSinceDelivery = now.difference(orderDate).inDays;
         
         if (daysSinceDelivery >= 7) {
           // If order was delivered more than 7 days ago, add to total earnings
-          total += order.totalAmount;
+          total += order.total;
         } else {
           // If order was delivered less than 7 days ago, add to pending earnings
-          pending += order.totalAmount;
+          pending += order.total;
         }
       }
     }
@@ -85,7 +98,19 @@ class EarningsController extends GetxController {
     // Calculate earnings for each day
     for (var order in _orders) {
       if (order.status == OrderStatus.delivered) {
-        final orderDate = order.orderDate;
+        // Handle orderDate
+        DateTime orderDate;
+        try {
+          if (order.orderDate is String) {
+            orderDate = DateTime.parse(order.orderDate as String);
+          } else {
+            orderDate = order.orderDate as DateTime;
+          }
+        } catch (e) {
+          _logger.w('Invalid orderDate format: ${order.orderDate}');
+          continue;
+        }
+        
         final orderDayStart = DateTime(orderDate.year, orderDate.month, orderDate.day);
         
         // Find the corresponding day in our list
@@ -96,7 +121,7 @@ class EarningsController extends GetxController {
         );
         
         if (dayIndex != -1) {
-          dailyEarnings[dayIndex]['amount'] = (dailyEarnings[dayIndex]['amount'] as double) + order.totalAmount;
+          dailyEarnings[dayIndex]['amount'] = (dailyEarnings[dayIndex]['amount'] as double) + order.total;
         }
       }
     }

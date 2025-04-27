@@ -10,7 +10,7 @@ class BaakasBottomSheetTheme {
     modalBackgroundColor: BaakasColors.white,
     constraints: const BoxConstraints(minWidth: double.infinity),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    modalBarrierColor: BaakasColors.black.withOpacity(0.5),
+    modalBarrierColor: BaakasColors.black.withValues(alpha: 128),
   );
 
   static BottomSheetThemeData darkBottomSheetTheme = BottomSheetThemeData(
@@ -19,6 +19,6 @@ class BaakasBottomSheetTheme {
     modalBackgroundColor: BaakasColors.dark,
     constraints: const BoxConstraints(minWidth: double.infinity),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    modalBarrierColor: BaakasColors.black.withOpacity(0.7),
+    modalBarrierColor: BaakasColors.black.withValues(alpha: 179),
   );
 }

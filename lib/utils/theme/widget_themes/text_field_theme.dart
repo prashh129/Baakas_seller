@@ -24,7 +24,7 @@ class BaakasTextFormFieldTheme {
       fontFamily: 'Poppins',
     ),
     floatingLabelStyle: const TextStyle().copyWith(
-      color: BaakasColors.black.withOpacity(0.8),
+      color: BaakasColors.black.withValues(alpha: 204),
       fontFamily: 'Poppins',
     ),
     border: const OutlineInputBorder().copyWith(
@@ -64,7 +64,7 @@ class BaakasTextFormFieldTheme {
       fontFamily: 'Poppins',
     ),
     floatingLabelStyle: const TextStyle().copyWith(
-      color: BaakasColors.white.withOpacity(0.8),
+      color: BaakasColors.white.withValues(alpha: 204),
       fontFamily: 'Poppins',
     ),
     border: const OutlineInputBorder().copyWith(
