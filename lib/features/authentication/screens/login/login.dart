@@ -6,12 +6,16 @@ import '../../../../utils/constants/sizes.dart';
 import '../../../../utils/constants/text_strings.dart';
 import 'widgets/login_form.dart';
 import 'widgets/login_header.dart';
+import '../../controllers/login_in_controller.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Initialize LoginController
+    Get.put(LoginController());
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(

@@ -9,6 +9,8 @@ import 'data/repositories/authentication/authentication_repository.dart';
 import 'firebase_options.dart';
 import 'features/settings/controllers/language_controller.dart';
 import 'features/shop/controllers/category_controller.dart';
+import 'bindings/general_bindings.dart';
+import 'utils/helpers/network_manager.dart';
 
 /// -- Entry point of Flutter App
 Future<void> main() async {
@@ -25,6 +27,15 @@ Future<void> main() async {
     // Initialize GetStorage first
     await GetStorage.init();
     debugPrint("GetStorage initialized");
+
+    // Initialize GeneralBindings first
+    try {
+      final generalBindings = GeneralBindings();
+      generalBindings.dependencies();
+      debugPrint("GeneralBindings initialized");
+    } catch (e) {
+      debugPrint("GeneralBindings initialization failed: $e");
+    }
 
     // Configure system UI
     SystemChrome.setEnabledSystemUIMode(
